@@ -19,11 +19,14 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private int _menuIndex = 0;
     private string[] _menuOptions = { "PLAY", "EXIT" };
 
+    private GameMap _map;
+    private int _tileSize;
+
     public DungeonGame()
     {
         _graphics = new GraphicsDeviceManager(this);
-        _graphics.PreferredBackBufferWidth = 800;
-        _graphics.PreferredBackBufferHeight = 600;
+        _graphics.PreferredBackBufferWidth = 864;
+        _graphics.PreferredBackBufferHeight = 648;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
@@ -42,6 +45,11 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         // Lag en 1x1 hvit tekstur for å tegne rektangler
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
+        _map = new GameMap();
+        _tileSize = Math.Min(
+        _graphics.PreferredBackBufferWidth / _map.Width,
+        _graphics.PreferredBackBufferHeight / _map.Height
+        );
     }
 
     protected override void Update(GameTime gameTime)
@@ -93,12 +101,17 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         // Instruksjon
         _spriteBatch.DrawString(_font, "W/S = VELG   ENTER = OK", new Vector2(195, 500), Color.DarkGray);
     }
-
     private void DrawGame()
     {
-        // Her tegner vi kartet senere
-        DrawRect(new Rectangle(100, 100, 30, 30), Color.Yellow);
-        _spriteBatch.DrawString(_font, "SPILLET STARTER SNART!", new Vector2(250, 280), Color.White);
+        for (int y = 0; y < _map.Height; y++)
+        {
+            for (int x = 0; x < _map.Width; x++)
+            {
+            char tile = _map.GetTile(x, y);
+            Color color = tile == '#' ? Color.DarkBlue : Color.Black;
+            DrawRect(new Rectangle(x * _tileSize, y * _tileSize, _tileSize - 1, _tileSize - 1), color);
+            }
+        }
     }
 
     private void DrawRect(Rectangle rect, Color color)
