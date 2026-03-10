@@ -13,8 +13,6 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private SpriteFont _font;
     private SpriteFont _titleFont;
     private Texture2D _pixel;
-
-    private enum GameState { Menu, Playing }
     private GameState _state = GameState.Menu;
 
     private int _menuIndex = 0;
@@ -26,10 +24,10 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private double _moveTimer = 0;
     private double _moveDelay = 0.15; // sekunder mellom hvert steg
     private double _enemyTimer = 0;
-private double _enemyDelay = 0.5; // fiender beveger seg hvert 0.5 sekund
+    private double _enemyDelay = 0.5; // fiender beveger seg hvert 0.5 sekund
     private List<Enemy> _enemies;
-
     private KeyboardState _prevKeyboard;
+    private enum GameState { Menu, Playing, GameOver }
 
     public DungeonGame()
     {
@@ -105,7 +103,40 @@ private double _enemyDelay = 0.5; // fiender beveger seg hvert 0.5 sekund
                     enemy.MoveTowards(_player.X, _player.Y, _map, _enemies);
                     _enemyTimer = _enemyDelay;
                 }
+                // Sjekk kollisjon med fiender
+                for (int i = _enemies.Count - 1; i >= 0; i--)
+                {
+                    if (_enemies[i].X == _player.X && _enemies[i].Y == _player.Y)
+                    {
+                        _player.TakeDamage(_enemies[i].AttackPower);
+                        _enemies[i].TakeDamage(_player.AttackPower);
+
+                        if (!_enemies[i].IsAlive)
+                            _enemies.RemoveAt(i);
+
+                        if (!_player.IsAlive)
+                        {
+                            _state = GameState.GameOver;
+                            return;
+                        }
+                    }
+                }
             }
+                if (_state == GameState.GameOver)  // ← legg til her
+                {
+                    if (keyboard.IsKeyDown(Keys.Enter))
+                    {
+                        _player = new Player(1, 1);
+                        _enemies = new List<Enemy>
+                    {
+                        new Enemy(8, 2),
+                        new Enemy(6, 4),
+                        new Enemy(9, 7)
+                    };
+                        _state = GameState.Playing;
+                    }
+                }
+            
 
             base.Update(gameTime);
     }
@@ -115,9 +146,11 @@ private double _enemyDelay = 0.5; // fiender beveger seg hvert 0.5 sekund
         _spriteBatch.Begin();
 
         if (_state == GameState.Menu)
-            DrawMenu();
-        else
-            DrawGame();
+        DrawMenu();
+        else if (_state == GameState.Playing)
+        DrawGame();
+        else if (_state == GameState.GameOver)
+        DrawGameOver();
 
         _spriteBatch.End();
         base.Draw(gameTime);
@@ -170,6 +203,12 @@ private double _enemyDelay = 0.5; // fiender beveger seg hvert 0.5 sekund
             _tileSize - 8),
             Color.Red);
         }
+    }
+
+    private void DrawGameOver()
+    {
+        _spriteBatch.DrawString(_titleFont, "GAME OVER", new Vector2(220, 250), Color.Red);
+        _spriteBatch.DrawString(_font, "TRYKK ENTER FOR A STARTE IGJEN", new Vector2(100, 350), Color.White);
     }
 
     private void DrawRect(Rectangle rect, Color color)
