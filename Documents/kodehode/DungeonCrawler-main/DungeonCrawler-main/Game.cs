@@ -176,6 +176,7 @@ public class Game
                 ShowStatus($"Du plukket opp en potion! +{p.HealAmount} HP");
             }
         }
+        
 
         // Sjekker kamp med fiender
         for (int i = _damageables.Count - 1; i >= 0; i--)
@@ -202,6 +203,11 @@ public class Game
                     _isRunning = false;
                     return;
                 }
+            }
+            foreach(IDamageable d in _damageables.ToList())
+            {
+                if (d is Enemy enemy && enemy.IsAlive)
+                    enemy.MoveTowards(_player.X, _player.Y, _map);
             }
         }
 

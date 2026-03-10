@@ -51,4 +51,25 @@ public class Enemy : Entity, IDamageable
         Console.WriteLine(message);
         Console.ResetColor();
     }
+    
+    public void MoveTowards(int playerX, int playerY, GameMap map)
+    {
+        int dx = 0;
+        int dy = 0;
+
+        if (playerX > X) dx = 1;
+        else if (playerX < X) dx = -1;
+
+        if (playerY > Y) dy = 1;
+        else if (playerY < Y) dy = -1;
+
+        // Prøv å flytte horisontalt først
+        if (dx != 0 && !map.IsWall(X + dx, Y))
+          X += dx;
+        // Ellers prøv vertikalt
+        else if (dy != 0 && !map.IsWall(X, Y + dy))
+          Y += dy;
+    }
+
+    
 }
