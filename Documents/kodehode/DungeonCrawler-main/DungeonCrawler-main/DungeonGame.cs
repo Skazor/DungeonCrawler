@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SpriteFontPlus;
+using DungeonCrawler.Entities;
 
 namespace DungeonCrawler;
 
@@ -20,7 +21,12 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private string[] _menuOptions = { "PLAY", "EXIT" };
 
     private GameMap _map;
+    private Player _player;
     private int _tileSize;
+    private double _moveTimer = 0;
+    private double _moveDelay = 0.15; // sekunder mellom hvert steg
+
+    private KeyboardState _prevKeyboard;
 
     public DungeonGame()
     {
@@ -46,6 +52,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
         _map = new GameMap();
+        _player = new Player(1, 1);
         _tileSize = Math.Min(
         _graphics.PreferredBackBufferWidth / _map.Width,
         _graphics.PreferredBackBufferHeight / _map.Height
@@ -67,9 +74,23 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
             }
         }
 
-        base.Update(gameTime);
-    }
+            if (_state == GameState.Playing)
+            {
+                var kb = Keyboard.GetState();
+                _moveTimer -= gameTime.ElapsedGameTime.TotalSeconds;
 
+                bool moved = false;
+                if (kb.IsKeyDown(Keys.W) && (_prevKeyboard.IsKeyUp(Keys.W) || _moveTimer <= 0)) { _player.TryMove(0, -1, _map); moved = true; }
+                if (kb.IsKeyDown(Keys.S) && (_prevKeyboard.IsKeyUp(Keys.S) || _moveTimer <= 0)) { _player.TryMove(0,  1, _map); moved = true; }
+                if (kb.IsKeyDown(Keys.A) && (_prevKeyboard.IsKeyUp(Keys.A) || _moveTimer <= 0)) { _player.TryMove(-1, 0, _map); moved = true; }
+                if (kb.IsKeyDown(Keys.D) && (_prevKeyboard.IsKeyUp(Keys.D) || _moveTimer <= 0)) { _player.TryMove(1,  0, _map); moved = true; }
+
+                if (moved) _moveTimer = _moveDelay;
+                _prevKeyboard = kb;
+            }
+
+            base.Update(gameTime);
+    }
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
@@ -112,6 +133,14 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
             DrawRect(new Rectangle(x * _tileSize, y * _tileSize, _tileSize - 1, _tileSize - 1), color);
             }
         }
+
+        // Tegn spiller
+        DrawRect(new Rectangle(
+        _player.X * _tileSize + 4,
+        _player.Y * _tileSize + 4,
+        _tileSize - 8,
+        _tileSize - 8),
+        Color.Yellow);
     }
 
     private void DrawRect(Rectangle rect, Color color)
