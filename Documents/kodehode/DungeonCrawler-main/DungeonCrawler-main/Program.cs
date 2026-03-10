@@ -1,10 +1,4 @@
-﻿namespace DungeonCrawler;
+﻿using DungeonCrawler;
 
-class Program
-{
-    static void Main()
-    {
-        var game = new Game();
-        game.Run();
-    }
-}
+using var game = new DungeonGame();
+game.Run();
