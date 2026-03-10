@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DungeonCrawler.Interfaces;
 
 namespace DungeonCrawler.Entities;
@@ -52,7 +53,7 @@ public class Enemy : Entity, IDamageable
         Console.ResetColor();
     }
     
-    public void MoveTowards(int playerX, int playerY, GameMap map)
+    public void MoveTowards(int playerX, int playerY, GameMap map, List<Enemy> others)
     {
       int dx = 0;
       int dy = 0;
@@ -63,20 +64,21 @@ public class Enemy : Entity, IDamageable
       if (playerY > Y) dy = 1;
       else if (playerY < Y) dy = -1;
 
-      // Prøv å flytte horisontalt
-      if (dx != 0 && !map.IsWall(X + dx, Y))
+      // Sjekk om destinasjonen er opptatt av en annen fiende
+      bool occupied(int nx, int ny) => others.Any(e => e != this && e.X == nx && e.Y == ny);
+
+      // Prøv horisontalt
+      if (dx != 0 && !map.IsWall(X + dx, Y) && !occupied(X + dx, Y))
       {
-        X += dx;
-        return;
+          X += dx;
+          return;
       }
 
-      // Prøv å flytte vertikalt
-      if (dy != 0 && !map.IsWall(X, Y + dy))
-      {
-        Y += dy;
-        return;
+        // Prøv vertikalt
+        if (dy != 0 && !map.IsWall(X, Y + dy) && !occupied(X, Y + dy))
+        {
+          Y += dy;
+          return;
+        }
       }
-    }
-
-    
 }

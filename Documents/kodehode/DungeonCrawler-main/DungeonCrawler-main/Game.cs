@@ -207,7 +207,7 @@ public class Game
             foreach(IDamageable d in _damageables.ToList())
             {
                 if (d is Enemy enemy && enemy.IsAlive)
-                    enemy.MoveTowards(_player.X, _player.Y, _map);
+                    enemy.MoveTowards(_player.X, _player.Y, _map, _damageables.OfType<Enemy>().ToList());
             }
         }
 

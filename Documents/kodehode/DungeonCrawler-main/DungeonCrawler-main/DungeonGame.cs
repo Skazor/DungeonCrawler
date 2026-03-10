@@ -102,7 +102,7 @@ private double _enemyDelay = 0.5; // fiender beveger seg hvert 0.5 sekund
                 if (_enemyTimer <= 0)
                 {
                     foreach (var enemy in _enemies)
-                    enemy.MoveTowards(_player.X, _player.Y, _map);
+                    enemy.MoveTowards(_player.X, _player.Y, _map, _enemies);
                     _enemyTimer = _enemyDelay;
                 }
             }
