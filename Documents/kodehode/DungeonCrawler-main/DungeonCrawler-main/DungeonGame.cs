@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SpriteFontPlus;
 
 namespace DungeonCrawler;
 
@@ -8,17 +9,15 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+    private SpriteFont _font;
+    private SpriteFont _titleFont;
+    private Texture2D _pixel;
 
-    // Spilltilstand: Meny eller Spill
     private enum GameState { Menu, Playing }
     private GameState _state = GameState.Menu;
 
-    // Meny-valg
     private int _menuIndex = 0;
-    private string[] _menuOptions = { "Play", "Exit" };
-
-    // Font for å tegne tekst
-    private SpriteFont _font;
+    private string[] _menuOptions = { "PLAY", "EXIT" };
 
     public DungeonGame()
     {
@@ -32,6 +31,17 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        // Last inn fonten fra .ttf-filen
+        var fontBytes = File.ReadAllBytes("PressStart2P-Regular.ttf");
+        _font = TtfFontBaker.Bake(fontBytes, 16, 1024, 1024,
+            new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
+        _titleFont = TtfFontBaker.Bake(fontBytes, 32, 1024, 1024,
+            new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
+
+        // Lag en 1x1 hvit tekstur for å tegne rektangler
+        _pixel = new Texture2D(GraphicsDevice, 1, 1);
+        _pixel.SetData(new[] { Color.White });
     }
 
     protected override void Update(GameTime gameTime)
@@ -68,31 +78,31 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
 
     private void DrawMenu()
     {
-        // Tegn tittel
-        DrawRect(new Rectangle(250, 80, 300, 80), Color.DarkBlue);
-        // Tegn meny-knapper
+        // Tittel
+        _spriteBatch.DrawString(_titleFont, "DUNGEON CRAWLER", new Vector2(120, 100), Color.Gold);
+
+        // Knapper
         for (int i = 0; i < _menuOptions.Length; i++)
         {
-            Color color = i == _menuIndex ? Color.Yellow : Color.White;
-            DrawRect(new Rectangle(300, 250 + i * 80, 200, 50), color);
+            Color btnColor = i == _menuIndex ? Color.Yellow : Color.DarkGray;
+            DrawRect(new Rectangle(300, 270 + i * 80, 200, 50), btnColor);
+            Color txtColor = i == _menuIndex ? Color.Black : Color.White;
+            _spriteBatch.DrawString(_font, _menuOptions[i], new Vector2(355, 285 + i * 80), txtColor);
         }
+
+        // Instruksjon
+        _spriteBatch.DrawString(_font, "W/S = VELG   ENTER = OK", new Vector2(195, 500), Color.DarkGray);
     }
 
     private void DrawGame()
     {
         // Her tegner vi kartet senere
-        DrawRect(new Rectangle(100, 100, 50, 50), Color.Yellow); // Spiller placeholder
+        DrawRect(new Rectangle(100, 100, 30, 30), Color.Yellow);
+        _spriteBatch.DrawString(_font, "SPILLET STARTER SNART!", new Vector2(250, 280), Color.White);
     }
 
-    // Hjelpemetode for å tegne fargede rektangler
-    private Texture2D _pixel;
     private void DrawRect(Rectangle rect, Color color)
     {
-        if (_pixel == null)
-        {
-            _pixel = new Texture2D(GraphicsDevice, 1, 1);
-            _pixel.SetData(new[] { Color.White });
-        }
         _spriteBatch.Draw(_pixel, rect, color);
     }
 }
