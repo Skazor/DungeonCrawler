@@ -25,6 +25,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private int _tileSize;
     private double _moveTimer = 0;
     private double _moveDelay = 0.15; // sekunder mellom hvert steg
+    private List<Enemy> _enemies;
 
     private KeyboardState _prevKeyboard;
 
@@ -53,6 +54,12 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         _pixel.SetData(new[] { Color.White });
         _map = new GameMap();
         _player = new Player(1, 1);
+        _enemies = new List<Enemy>
+        {
+            new Enemy(8, 2),
+            new Enemy(6, 4),
+            new Enemy(9, 7)
+        };
         _tileSize = Math.Min(
         _graphics.PreferredBackBufferWidth / _map.Width,
         _graphics.PreferredBackBufferHeight / _map.Height
@@ -141,6 +148,17 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         _tileSize - 8,
         _tileSize - 8),
         Color.Yellow);
+
+        // Tegn fiender
+        foreach (var e in _enemies)
+        {
+            DrawRect(new Rectangle(
+            e.X * _tileSize + 4,
+            e.Y * _tileSize + 4,
+            _tileSize - 8,
+            _tileSize - 8),
+            Color.Red);
+        }
     }
 
     private void DrawRect(Rectangle rect, Color color)
