@@ -25,6 +25,8 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private int _tileSize;
     private double _moveTimer = 0;
     private double _moveDelay = 0.15; // sekunder mellom hvert steg
+    private double _enemyTimer = 0;
+private double _enemyDelay = 0.5; // fiender beveger seg hvert 0.5 sekund
     private List<Enemy> _enemies;
 
     private KeyboardState _prevKeyboard;
@@ -94,6 +96,15 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
 
                 if (moved) _moveTimer = _moveDelay;
                 _prevKeyboard = kb;
+
+                // Flytt fiender mot spilleren
+                _enemyTimer -= gameTime.ElapsedGameTime.TotalSeconds;
+                if (_enemyTimer <= 0)
+                {
+                    foreach (var enemy in _enemies)
+                    enemy.MoveTowards(_player.X, _player.Y, _map);
+                    _enemyTimer = _enemyDelay;
+                }
             }
 
             base.Update(gameTime);
