@@ -44,6 +44,8 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     // Enum definert inne i klassen – kun synlig her (private scope)
     private enum GameState { Menu, Playing, GameOver }
 
+    private List<(int X, int Y)> _potions = new();
+
     public DungeonGame()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -85,6 +87,12 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         _graphics.PreferredBackBufferWidth / _map.Width,
         _graphics.PreferredBackBufferHeight / _map.Height
         );
+
+        _potions = new List<(int X, int Y)>
+        {
+            (3, 3),
+            (8, 6)
+        };
     }
 
     // Update() kjøres hver frame – all spillogikk (input, fysikk, AI) hører hjemme her
@@ -108,7 +116,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                 var kb = Keyboard.GetState();
 
                 // Trekk fra tid siden forrige frame – når _moveTimer når 0 kan spilleren flytte seg igjen
-                // gameTime.ElapsedGameTime.TotalSeconds er typisk ~0.016 ved 60 FPS
+                // gameTime.ElapsedGameTime.TotalSeconds er typisk 0.016 ved 60 FPS
                 _moveTimer -= gameTime.ElapsedGameTime.TotalSeconds;
 
                 bool moved = false;
@@ -123,6 +131,16 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
 
                 if (moved) _moveTimer = _moveDelay; // Reset timer etter bevegelse
                 _prevKeyboard = kb; // Husk denne framens tilstand til neste frame
+
+                // Sjekk potion-kollisjon
+                for (int i = _potions.Count - 1; i >= 0; i--)
+                {
+                    if (_potions[i].X == _player.X && _potions[i].Y == _player.Y)
+                    {
+                        _player.Heal(30);
+                        _potions.RemoveAt(i);
+                    }
+                }
 
                 // Flytt fiender mot spilleren
                 // Fiende-AI kjører på en egen timer, saktere enn spilleren
@@ -172,6 +190,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                         new Enemy(6, 4),
                         new Enemy(9, 7)
                     };
+                        _potions = new List<(int X, int Y)> { (3, 3), (8, 6) };
                         _state = GameState.Playing;
                     }
                 }
@@ -253,6 +272,17 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
             _tileSize - 8,
             _tileSize - 8),
             Color.Red);
+        }
+
+        // Tegn potions
+        foreach (var p in _potions)
+        {
+            DrawRect(new Rectangle(
+            p.X * _tileSize + 4,
+            p.Y * _tileSize + 4,
+            _tileSize - 8,
+            _tileSize - 8),
+            Color.Magenta);
         }
         
             // HP-bar nederst

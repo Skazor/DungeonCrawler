@@ -17,8 +17,8 @@ public class Enemy : Entity, IDamageable
 
     /*Fiendens helse (HP), starter på 30.
       private set: Kan bare endres inne i denne klassen (via TakeDamage).*/
-    public int Health { get; private set; } = 60;   // var 30
-    public int AttackPower { get; private set; } = 15; // var 5
+    public int Health { get; private set; } = 50;   // var 30
+    public int AttackPower { get; private set; } = 10; // var 5
 
     // Enkel sjekk om fienden fortsatt lever (brukes for å vite om den skal fjernes)
     public bool IsAlive => Health > 0;
