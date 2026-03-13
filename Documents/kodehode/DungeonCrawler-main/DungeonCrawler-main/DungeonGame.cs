@@ -42,9 +42,12 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private KeyboardState _prevKeyboard;
 
     // Enum definert inne i klassen – kun synlig her (private scope)
-    private enum GameState { Menu, Playing, GameOver }
+    private enum GameState { Menu, Playing, GameOver, Victory }
 
     private List<(int X, int Y)> _potions = new();
+    private bool _exitOpen = false;
+    private int _exitX = 10;
+    private int _exitY = 7;
 
     public DungeonGame()
     {
@@ -175,6 +178,17 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                         }
                     }
                 }
+
+                // Sjekk om alle fiender er drept
+                if (_enemies.Count == 0)
+                 _exitOpen = true;
+
+                // Sjekk om spilleren går ut
+                if (_exitOpen && _player.X == _exitX && _player.Y == _exitY)
+                {
+                    _state = GameState.Victory;
+                    return;
+                }
             }
                 if (_state == GameState.GameOver) 
                 {
@@ -192,6 +206,23 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                     };
                         _potions = new List<(int X, int Y)> { (3, 3), (8, 6) };
                         _state = GameState.Playing;
+                    }
+                }
+
+                if (_state == GameState.Victory)
+                {
+                    if (keyboard.IsKeyDown(Keys.Enter))
+                    {
+                        _player = new Player(1, 1);
+                        _enemies = new List<Enemy>
+                        {
+                            new Enemy(8, 2),
+                            new Enemy(6, 4),
+                            new Enemy(9, 7)
+                        };
+                            _potions = new List<(int X, int Y)> { (3, 3), (8, 6) };
+                            _exitOpen = false;
+                            _state = GameState.Playing;
                     }
                 }
             
@@ -215,6 +246,8 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         DrawGame();
         else if (_state == GameState.GameOver)
         DrawGameOver();
+        else if (_state == GameState.Victory)
+        DrawVictory();
 
         _spriteBatch.End();
         base.Draw(gameTime);
@@ -284,6 +317,17 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
             _tileSize - 8),
             Color.Magenta);
         }
+
+        // Tegn utgang hvis åpen
+        if (_exitOpen)
+        {
+            DrawRect(new Rectangle(
+            _exitX * _tileSize + 4,
+            _exitY * _tileSize + 4,
+            _tileSize - 8,
+            _tileSize - 8),
+            Color.LimeGreen);
+        }
         
             // HP-bar nederst
             int barWidth = 300;
@@ -305,6 +349,12 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private void DrawGameOver()
     {
         _spriteBatch.DrawString(_titleFont, "GAME OVER", new Vector2(220, 250), Color.Red);
+        _spriteBatch.DrawString(_font, "TRYKK ENTER FOR A STARTE IGJEN", new Vector2(100, 350), Color.White);
+    }
+
+    private void DrawVictory()
+    {
+        _spriteBatch.DrawString(_titleFont, "YOU WIN!", new Vector2(270, 250), Color.Gold);
         _spriteBatch.DrawString(_font, "TRYKK ENTER FOR A STARTE IGJEN", new Vector2(100, 350), Color.White);
     }
 
