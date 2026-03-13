@@ -48,6 +48,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private bool _exitOpen = false;
     private int _exitX = 10;
     private int _exitY = 7;
+    private Renderer _renderer;
 
     public DungeonGame()
     {
@@ -76,6 +77,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         // Lag en 1x1 hvit tekstur for å tegne rektangler
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
+        _renderer = new Renderer(_spriteBatch, _font, _titleFont, _pixel, _graphics);
         _map = new GameMap();
         _player = new Player(1, 1);
         _enemies = new List<Enemy>
@@ -238,130 +240,20 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         
         // Begin() og End() wrapper all SpriteBatch-tegning.
         // Alt mellom disse samles opp og sendes på en gang
-        _spriteBatch.Begin();
-
-        if (_state == GameState.Menu)
-        DrawMenu();
+         _spriteBatch.Begin();
+         
+         if (_state == GameState.Menu)
+            _renderer.DrawMenu(_menuIndex, _menuOptions);
         else if (_state == GameState.Playing)
-        DrawGame();
+            _renderer.DrawGame(_map, _player, _enemies, _potions, _exitOpen, _exitX, _exitY, _tileSize);
         else if (_state == GameState.GameOver)
-        DrawGameOver();
+            _renderer.DrawGameOver();
         else if (_state == GameState.Victory)
-        DrawVictory();
+            _renderer.DrawVictory();
 
         _spriteBatch.End();
         base.Draw(gameTime);
     }
 
-    private void DrawMenu()
-    {
-        // Tittel
-        _spriteBatch.DrawString(_titleFont, "DUNGEON CRAWLER", new Vector2(120, 100), Color.Gold);
 
-        // Knapper
-        for (int i = 0; i < _menuOptions.Length; i++)
-        {
-            // Ternary operator(en kortform for en enkel if/else): condition ? verdiHvisTrue : verdiHvisFalse
-            // Valgt knapp får en annen farge enn uvalgte
-            Color btnColor = i == _menuIndex ? Color.Yellow : Color.DarkGray;
-            DrawRect(new Rectangle(300, 270 + i * 80, 200, 50), btnColor);
-            Color txtColor = i == _menuIndex ? Color.Black : Color.White;
-            _spriteBatch.DrawString(_font, _menuOptions[i], new Vector2(355, 285 + i * 80), txtColor);
-        }
-
-        // Instruksjon
-        _spriteBatch.DrawString(_font, "W/S = VELG   ENTER = OK", new Vector2(195, 500), Color.DarkGray);
-    }
-    private void DrawGame()
-    {
-        // Tegn kartet tile for tile. Koordinat (x,y) i rutenett --> pikselposisjon = x * tileSize
-        for (int y = 0; y < _map.Height; y++)
-        {
-            for (int x = 0; x < _map.Width; x++)
-            {
-            char tile = _map.GetTile(x, y);
-            // '#' = vegg (mørk blå), alt annet = gulv (svart)
-            Color color = tile == '#' ? Color.DarkBlue : Color.Black;
-            // -1 på størrelsen lager en liten margin mellom tiles (grid-effekt)
-            DrawRect(new Rectangle(x * _tileSize, y * _tileSize, _tileSize - 1, _tileSize - 1), color);
-            }
-        }
-
-        // Tegn spiller
-        // +4 og -8 sentrerer spilleren visuelt inni tilen (margin på alle sider)
-        DrawRect(new Rectangle(
-        _player.X * _tileSize + 4,
-        _player.Y * _tileSize + 4,
-        _tileSize - 8,
-        _tileSize - 8),
-        Color.Yellow);
-
-        // Tegn fiender
-        foreach (var e in _enemies)
-        {
-            DrawRect(new Rectangle(
-            e.X * _tileSize + 4,
-            e.Y * _tileSize + 4,
-            _tileSize - 8,
-            _tileSize - 8),
-            Color.Red);
-        }
-
-        // Tegn potions
-        foreach (var p in _potions)
-        {
-            DrawRect(new Rectangle(
-            p.X * _tileSize + 4,
-            p.Y * _tileSize + 4,
-            _tileSize - 8,
-            _tileSize - 8),
-            Color.Magenta);
-        }
-
-        // Tegn utgang hvis åpen
-        if (_exitOpen)
-        {
-            DrawRect(new Rectangle(
-            _exitX * _tileSize + 4,
-            _exitY * _tileSize + 4,
-            _tileSize - 8,
-            _tileSize - 8),
-            Color.LimeGreen);
-        }
-        
-            // HP-bar nederst
-            int barWidth = 300;
-            int barHeight = 20;
-            int barX = 20;
-            int barY = _graphics.PreferredBackBufferHeight - 40;
-
-            // Bakgrunn (rød)
-            DrawRect(new Rectangle(barX, barY, barWidth, barHeight), Color.DarkRed);
-
-            // Fyllt del (grønn) basert på HP
-            int filledWidth = (int)(barWidth * (_player.Health / 100.0));
-            DrawRect(new Rectangle(barX, barY, filledWidth, barHeight), Color.Green);
-
-            // HP-tekst
-            _spriteBatch.DrawString(_font, $"HP: {_player.Health}", new Vector2(barX + barWidth + 10, barY), Color.White);
-    }
-
-    private void DrawGameOver()
-    {
-        _spriteBatch.DrawString(_titleFont, "GAME OVER", new Vector2(220, 250), Color.Red);
-        _spriteBatch.DrawString(_font, "TRYKK ENTER FOR A STARTE IGJEN", new Vector2(100, 350), Color.White);
-    }
-
-    private void DrawVictory()
-    {
-        _spriteBatch.DrawString(_titleFont, "YOU WIN!", new Vector2(270, 250), Color.Gold);
-        _spriteBatch.DrawString(_font, "TRYKK ENTER FOR A STARTE IGJEN", new Vector2(100, 350), Color.White);
-    }
-
-    // Hjelpemetode: tegner et farget rektangel ved å strekke 1x1-pikselen.
-    // Samler repeterende kode, DRY-prinsippet (Don't Repeat Yourself)
-    private void DrawRect(Rectangle rect, Color color)
-    {
-        _spriteBatch.Draw(_pixel, rect, color);
-    }
 }
