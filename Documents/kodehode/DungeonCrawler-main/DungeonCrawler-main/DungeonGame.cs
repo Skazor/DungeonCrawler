@@ -59,6 +59,10 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     };
         private int _classIndex = 0;
 
+    private Texture2D _tilesetTexture = null!;
+    private Texture2D _playerTexture = null!;
+    private Texture2D _enemyTexture = null!;
+
     public DungeonGame()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -72,20 +76,26 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     // LoadContent() kjøres en gang ved oppstart – last inn teksturer, fonter, evnt lyder her
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+       _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Last inn fonten fra .ttf-filen
         var fontBytes = File.ReadAllBytes("PressStart2P-Regular.ttf");
-        _font = TtfFontBaker.Bake(fontBytes, 16, 1024, 1024,
+            _font = TtfFontBaker.Bake(fontBytes, 16, 1024, 1024,
         new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
-        _titleFont = TtfFontBaker.Bake(fontBytes, 32, 1024, 1024,
+            _titleFont = TtfFontBaker.Bake(fontBytes, 32, 1024, 1024,
         new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
 
         // Lag en 1x1 hvit tekstur for å tegne rektangler
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
-        _renderer = new Renderer(_spriteBatch, _font, _titleFont, _pixel, _graphics);
 
+        // Last inn sprites
+        _tilesetTexture = Texture2D.FromFile(GraphicsDevice, "Content/atlas_floor-16x16.png");
+        _playerTexture = Texture2D.FromFile(GraphicsDevice, "Content/frames/knight_m_idle_anim_f0.png");
+        _enemyTexture = Texture2D.FromFile(GraphicsDevice, "Content/frames/big_demon_idle_anim_f0.png");
+
+        _renderer = new Renderer(_spriteBatch, _font, _titleFont, _pixel, _graphics, _tilesetTexture, _playerTexture, _enemyTexture);
+        
         InitializeGame();
     }
 
