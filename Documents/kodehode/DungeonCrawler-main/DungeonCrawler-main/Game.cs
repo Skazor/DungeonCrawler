@@ -31,7 +31,7 @@ public class Game
     public Game()
     {
         _map = new GameMap();
-        _player = new Player(2, 2, new CharacterClass(ClassType.Warrior)); // Starter på posisjon (2,2) inni området
+        _player = new Player(2, 2, new CharacterClass(ClassType.Warrior));  // Starter på posisjon (2,2) inni området
 
         // Opprett utgang (X), plassert på en gulv-rute
         _exit = new Exit(10, 7);

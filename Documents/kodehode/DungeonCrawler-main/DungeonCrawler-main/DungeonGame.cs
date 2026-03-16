@@ -75,38 +75,51 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Last inn fonten fra .ttf-filen
-        // SpriteFontPlus gjør at man kan bruke vanlige .ttf-filer istedenfor MonoGames
-        // innebygde fontformat (.spritefont) – mer fleksibelt
         var fontBytes = File.ReadAllBytes("PressStart2P-Regular.ttf");
         _font = TtfFontBaker.Bake(fontBytes, 16, 1024, 1024,
-            new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
+        new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
         _titleFont = TtfFontBaker.Bake(fontBytes, 32, 1024, 1024,
-            new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
+        new[] { CharacterRange.BasicLatin }).CreateSpriteFont(GraphicsDevice);
 
         // Lag en 1x1 hvit tekstur for å tegne rektangler
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
         _renderer = new Renderer(_spriteBatch, _font, _titleFont, _pixel, _graphics);
-        _map = new GameMap();
-        _player = new Player(1, 1, _classes[_classIndex]);
-        _enemies = new List<Enemy>
+
+        InitializeGame();
+    }
+
+    private void InitializeGame()
+    {
+        var rng = new Random();
+        _map = new GameMap(24, 16);
+
+        var firstRoom = _map.Rooms[0];
+        _player = new Player(firstRoom.CenterX, firstRoom.CenterY, _classes[_classIndex]);
+
+        _enemies = new List<Enemy>();
+        for (int i = 1; i < Math.Min(4, _map.Rooms.Count); i++)
         {
-            new Enemy(8, 2),
-            new Enemy(6, 4),
-            new Enemy(9, 7)
-        };
-        // Regner ut tile-størrelse dynamisk basert på skjermstørrelse og kartets dimensjoner.
-        // Math.Min() sikrer at tiles aldri er større enn det minste av bredde/høyde tillater
+            var room = _map.Rooms[i];
+            _enemies.Add(new Enemy(room.CenterX, room.CenterY));
+        }
+
+        _potions = new List<(int X, int Y)>();
+        for (int i = 4; i < Math.Min(6, _map.Rooms.Count); i++)
+        {
+            var room = _map.Rooms[i];
+            _potions.Add((room.CenterX, room.CenterY));
+        }
+
+        var lastRoom = _map.Rooms[_map.Rooms.Count - 1];
+        _exitX = lastRoom.CenterX;
+        _exitY = lastRoom.CenterY;
+        _exitOpen = false;
+
         _tileSize = Math.Min(
         _graphics.PreferredBackBufferWidth / _map.Width,
         _graphics.PreferredBackBufferHeight / _map.Height
         );
-
-        _potions = new List<(int X, int Y)>
-        {
-            (3, 3),
-            (8, 6)
-        };
     }
 
     // Update() kjøres hver frame – all spillogikk (input, fysikk, AI) hører hjemme her
@@ -135,7 +148,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                 _classIndex = (_classIndex - 1 + _classes.Length) % _classes.Length;
             if (keyboard.IsKeyDown(Keys.Enter) && _prevKeyboard.IsKeyUp(Keys.Enter))
             {
-                _player = new Player(1, 1, _classes[_classIndex]);
+                InitializeGame();
                 _state = GameState.Playing;
             }   
                 _prevKeyboard = keyboard;
@@ -221,17 +234,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                 {
                     if (keyboard.IsKeyDown(Keys.Enter))
                     {
-                        
-                        // Restart: lag nye objekter fra scratch istedenfor å "reparere" gamle.
-                        // Dette er enklere og unngår at gammel tilstand lekker inn i ny runde
-                        _player = new Player(1, 1, _classes[_classIndex]);
-                        _enemies = new List<Enemy>
-                    {
-                        new Enemy(8, 2),
-                        new Enemy(6, 4),
-                        new Enemy(9, 7)
-                    };
-                        _potions = new List<(int X, int Y)> { (3, 3), (8, 6) };
+                        InitializeGame();
                         _state = GameState.Playing;
                     }
                 }
@@ -240,16 +243,8 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                 {
                     if (keyboard.IsKeyDown(Keys.Enter))
                     {
-                        _player = new Player(1, 1, _classes[_classIndex]);
-                        _enemies = new List<Enemy>
-                        {
-                            new Enemy(8, 2),
-                            new Enemy(6, 4),
-                            new Enemy(9, 7)
-                        };
-                            _potions = new List<(int X, int Y)> { (3, 3), (8, 6) };
-                            _exitOpen = false;
-                            _state = GameState.Playing;
+                        InitializeGame();
+                        _state = GameState.Playing;
                     }
                 }
             
