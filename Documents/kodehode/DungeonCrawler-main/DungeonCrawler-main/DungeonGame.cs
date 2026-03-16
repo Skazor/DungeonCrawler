@@ -42,13 +42,22 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private KeyboardState _prevKeyboard;
 
     // Enum definert inne i klassen – kun synlig her (private scope)
-    private enum GameState { Menu, Playing, GameOver, Victory }
+    private enum GameState { Menu, CharacterCreation, Playing, GameOver, Victory }
 
     private List<(int X, int Y)> _potions = new();
     private bool _exitOpen = false;
     private int _exitX = 10;
     private int _exitY = 7;
     private Renderer _renderer;
+    private CharacterClass[] _classes = new[]
+    {
+        new CharacterClass(ClassType.Warrior),
+        new CharacterClass(ClassType.Mage),
+        new CharacterClass(ClassType.Rogue),
+        new CharacterClass(ClassType.Paladin),
+        new CharacterClass(ClassType.Hunter)
+    };
+        private int _classIndex = 0;
 
     public DungeonGame()
     {
@@ -79,7 +88,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         _pixel.SetData(new[] { Color.White });
         _renderer = new Renderer(_spriteBatch, _font, _titleFont, _pixel, _graphics);
         _map = new GameMap();
-        _player = new Player(1, 1);
+        _player = new Player(1, 1, _classes[_classIndex]);
         _enemies = new List<Enemy>
         {
             new Enemy(8, 2),
@@ -111,9 +120,25 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
             if (keyboard.IsKeyDown(Keys.W)) _menuIndex = 0;
             if (keyboard.IsKeyDown(Keys.Enter))
             {
-                if (_menuIndex == 0) _state = GameState.Playing;
+                if (_menuIndex == 0) _state = GameState.CharacterCreation; 
                 if (_menuIndex == 1) Exit();
             }
+
+                _prevKeyboard = keyboard;
+        }
+
+        if (_state == GameState.CharacterCreation)
+        {
+            if (keyboard.IsKeyDown(Keys.D) && _prevKeyboard.IsKeyUp(Keys.D))
+                _classIndex = (_classIndex + 1) % _classes.Length;
+            if (keyboard.IsKeyDown(Keys.A) && _prevKeyboard.IsKeyUp(Keys.A))
+                _classIndex = (_classIndex - 1 + _classes.Length) % _classes.Length;
+            if (keyboard.IsKeyDown(Keys.Enter) && _prevKeyboard.IsKeyUp(Keys.Enter))
+            {
+                _player = new Player(1, 1, _classes[_classIndex]);
+                _state = GameState.Playing;
+            }   
+                _prevKeyboard = keyboard;
         }
 
             if (_state == GameState.Playing)
@@ -199,7 +224,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                         
                         // Restart: lag nye objekter fra scratch istedenfor å "reparere" gamle.
                         // Dette er enklere og unngår at gammel tilstand lekker inn i ny runde
-                        _player = new Player(1, 1);
+                        _player = new Player(1, 1, _classes[_classIndex]);
                         _enemies = new List<Enemy>
                     {
                         new Enemy(8, 2),
@@ -215,7 +240,7 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
                 {
                     if (keyboard.IsKeyDown(Keys.Enter))
                     {
-                        _player = new Player(1, 1);
+                        _player = new Player(1, 1, _classes[_classIndex]);
                         _enemies = new List<Enemy>
                         {
                             new Enemy(8, 2),
@@ -250,6 +275,9 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
             _renderer.DrawGameOver();
         else if (_state == GameState.Victory)
             _renderer.DrawVictory();
+
+        else if (_state == GameState.CharacterCreation)
+            _renderer.DrawCharacterCreation(_classes, _classIndex);
 
         _spriteBatch.End();
         base.Draw(gameTime);

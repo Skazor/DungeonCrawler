@@ -109,4 +109,39 @@ public class Renderer
     {
         _spriteBatch.Draw(_pixel, rect, color);
     }
+
+    public void DrawCharacterCreation(CharacterClass[] classes, int index)
+    {
+        var c = classes[index];
+
+        _spriteBatch.DrawString(_titleFont, "CHOOSE CLASS", new Vector2(170, 60), Color.Gold);
+
+        // Pil-navigasjon
+        _spriteBatch.DrawString(_font, "< A", new Vector2(60, 300), Color.DarkGray);
+        _spriteBatch.DrawString(_font, "D >", new Vector2(740, 300), Color.DarkGray);
+
+        // Klassenavn
+        _spriteBatch.DrawString(_titleFont, c.Name, new Vector2(400 - c.Name.Length * 10, 160), Color.Yellow);
+
+        // Beskrivelse
+        _spriteBatch.DrawString(_font, c.Description, new Vector2(100, 230), Color.White);
+
+        // Stats-boks
+        DrawRect(new Rectangle(250, 270, 364, 200), Color.DarkSlateGray);
+
+        _spriteBatch.DrawString(_font, $"HP:      {c.MaxHealth}", new Vector2(270, 290), Color.LimeGreen);
+        _spriteBatch.DrawString(_font, $"ATTACK:  {c.AttackPower}", new Vector2(270, 320), Color.OrangeRed);
+        _spriteBatch.DrawString(_font, $"DEFENSE: {c.Defense}", new Vector2(270, 350), Color.CornflowerBlue);
+        _spriteBatch.DrawString(_font, $"CRIT:    {(int)(c.CritChance * 100)}%", new Vector2(270, 380), Color.Violet);
+        _spriteBatch.DrawString(_font, $"SPEED:   {(c.MoveDelay <= 0.10 ? "FAST" : c.MoveDelay <= 0.14 ? "NORMAL" : "SLOW")}", new Vector2(270, 410), Color.Gold);
+
+        // Klasse-indikatorer nederst
+        for (int i = 0; i < classes.Length; i++)
+        {
+            Color dotColor = i == index ? Color.Yellow : Color.DarkGray;
+            DrawRect(new Rectangle(350 + i * 30, 500, 15, 15), dotColor);
+        }
+
+        _spriteBatch.DrawString(_font, "ENTER = VELG", new Vector2(310, 540), Color.DarkGray);
+    }
 }
