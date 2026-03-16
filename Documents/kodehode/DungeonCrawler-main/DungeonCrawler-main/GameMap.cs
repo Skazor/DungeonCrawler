@@ -38,9 +38,9 @@ public class GameMap
                 _tiles[y, x] = '#';
 
         // Generer tilfeldige rom
-        int maxRooms = 12;
-        int minSize = 4;
-        int maxSize = 8;
+        int maxRooms = 18;
+        int minSize = 3;
+        int maxSize = 7;
 
         for (int i = 0; i < maxRooms; i++)
         {

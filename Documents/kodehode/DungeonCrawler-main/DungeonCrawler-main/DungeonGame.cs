@@ -63,8 +63,8 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     {
         _graphics = new GraphicsDeviceManager(this);
         // Setter vindusstørrelsen i piksler
-        _graphics.PreferredBackBufferWidth = 864;
-        _graphics.PreferredBackBufferHeight = 648;
+        _graphics.PreferredBackBufferWidth = 960;
+        _graphics.PreferredBackBufferHeight = 720;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
@@ -92,10 +92,10 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
     private void InitializeGame()
     {
         var rng = new Random();
-        _map = new GameMap(24, 16);
+            _map = new GameMap(32, 18);
 
         var firstRoom = _map.Rooms[0];
-        _player = new Player(firstRoom.CenterX, firstRoom.CenterY, _classes[_classIndex]);
+            _player = new Player(firstRoom.CenterX, firstRoom.CenterY, _classes[_classIndex]);
 
         _enemies = new List<Enemy>();
         for (int i = 1; i < Math.Min(4, _map.Rooms.Count); i++)
@@ -112,13 +112,13 @@ public class DungeonGame : Microsoft.Xna.Framework.Game
         }
 
         var lastRoom = _map.Rooms[_map.Rooms.Count - 1];
-        _exitX = lastRoom.CenterX;
-        _exitY = lastRoom.CenterY;
-        _exitOpen = false;
+            _exitX = lastRoom.CenterX;
+            _exitY = lastRoom.CenterY;
+            _exitOpen = false;
 
         _tileSize = Math.Min(
-        _graphics.PreferredBackBufferWidth / _map.Width,
-        _graphics.PreferredBackBufferHeight / _map.Height
+            _graphics.PreferredBackBufferWidth / _map.Width,
+            (_graphics.PreferredBackBufferHeight - 80) / _map.Height  // -80 gir plass til HUD
         );
     }
 

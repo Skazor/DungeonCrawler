@@ -80,7 +80,7 @@ public class Renderer
         int barWidth = 300;
         int barHeight = 20;
         int barX = 20;
-        int barY = _graphics.PreferredBackBufferHeight - 40;
+        int barY = _graphics.PreferredBackBufferHeight - 50;
 
         DrawRect(new Rectangle(barX, barY, barWidth, barHeight), Color.DarkRed);
         // filledWidth beregnes som andel av maks HP – går mot 0 når spilleren nærmer seg døden
